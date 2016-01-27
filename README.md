@@ -1,6 +1,8 @@
 # liquid-charts-js
 Liquid Charts is a javascript library for displaying charts build in Liquid on third party sites.
 
+Liquid Charts currently only supports displaying public charts. Capabilities for displaying charts from private datasets will come in later versions.
+
 ## Dependencies
 * jQuery 2.2 (http://code.jquery.com/jquery-2.2.0.min.js)
 * momentjs (http://momentjs.com/downloads/moment.js)
@@ -18,9 +20,6 @@ Liquid Charts is a javascript library for displaying charts build in Liquid on t
 
   ``Liquid.init("getliquid.io",true)``
 
-1. Call initChart on div where you want the chart to be displayed and pass the ID of chart:
+1. Call initChart on div where you want the chart to be displayed and pass the ID of the chart.
 
   ``Liquid.initChart($('#chart'),"5huH969SKL3KcJsKN")``
-
-
-  
