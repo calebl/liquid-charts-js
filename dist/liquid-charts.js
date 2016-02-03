@@ -13,7 +13,33 @@ this.ChartBuilder = (function() {
     return this.idArray;
   };
 
-  ChartBuilder.prototype.getData = function(records) {
+  ChartBuilder.prototype.processAggregateData = function(dataArray) {
+    var categories, chart, data, options, self, series, seriesName, xAxis, yAxis;
+    chart = this.chart;
+    options = this.getOptions();
+    xAxis = options.xAxis;
+    yAxis = options.yAxis;
+    categories = null;
+    if (chart.yField.type === Form.FieldTypes.CHOICE || chart.type === 'bar') {
+      categories = xAxis.categories;
+    }
+    self = this;
+    series = [];
+    data = [];
+    _.each(dataArray, function(d) {
+      return data.push([d.date.valueOf(), d.total]);
+    });
+    seriesName = chart.label;
+    series.push({
+      id: seriesName,
+      name: seriesName,
+      color: ChartBuilder.colors[series.length % ChartBuilder.colors.length],
+      data: data
+    });
+    return series;
+  };
+
+  ChartBuilder.prototype.processRecords = function(records) {
     var categories, chart, cols, fields, idArray, options, self, series, xAxis, yAxis;
     chart = this.chart;
     options = this.getOptions();
@@ -325,10 +351,11 @@ this.ChartBuilder = (function() {
   };
 
   ChartBuilder.prototype.getBarChartOptions = function(chart) {
-    var groupByField, shared, xAxis, xField, yField;
+    var aggregateBy, groupByField, shared, xAxis, xField, yField;
     yField = chart.yField;
     xField = chart.xField;
     groupByField = chart.groupByField;
+    aggregateBy = chart.aggregateBy;
     xAxis = ChartBuilder.getAxisInfo(xField);
     shared = {
       chart: {
@@ -361,9 +388,25 @@ this.ChartBuilder = (function() {
       },
       tooltip: {
         formatter: function() {
-          var str, verb, where;
-          if (yField.type === Form.FieldTypes.NUMBER || chart.yField.type === Form.FieldTypes.CALCULATED_SUM) {
-            str = this.x + ': ' + this.y;
+          var date, dateFormat, str, timestampFormat, verb, where;
+          if (Form.NumericFieldTypes.indexOf(yField.type) > -1) {
+            if (chart.aggregateBy) {
+              dateFormat = 'MMM DD YYYY';
+              timestampFormat = 'MMM DD YYYY h:mm a';
+              date = moment.utc(this.x);
+              switch (chart.aggregateBy) {
+                case "day":
+                  str = date.format(dateFormat) + ': <b>' + this.y + '</b>';
+                  break;
+                case "hour":
+                  str = date.format(timestampFormat) + ': <b>' + this.y + '</b>';
+                  break;
+                default:
+                  str = date + ': ' + this.y;
+              }
+            } else {
+              str = this.x + ': ' + this.y;
+            }
           } else {
             str = '<b>' + this.y + '</b> entries';
             if (_.isUndefined(yField.type.options)) {
@@ -387,7 +430,7 @@ this.ChartBuilder = (function() {
     };
     switch (yField.type) {
       case Form.FieldTypes.BOOLEAN:
-        return _.extend(shared, {
+        _.extend(shared, {
           xAxis: {
             categories: ['yes', 'no'],
             title: {
@@ -395,12 +438,13 @@ this.ChartBuilder = (function() {
             }
           }
         });
+        break;
       case Form.FieldTypes.NUMBER:
       case Form.FieldTypes.CALCULATED_SUM:
       case Form.FieldTypes.CALCULATED_QUOTIENT:
       case Form.FieldTypes.LENGTH:
       case Form.FieldTypes.TEMPERATURE:
-        return _.extend(shared, {
+        _.extend(shared, {
           xAxis: {
             categories: ['total'],
             title: {
@@ -408,8 +452,9 @@ this.ChartBuilder = (function() {
             }
           }
         });
+        break;
       case Form.FieldTypes.CHOICE:
-        return _.extend(shared, {
+        _.extend(shared, {
           xAxis: {
             categories: _.map(yField.options, function(obj, index) {
               return obj.value;
@@ -420,10 +465,20 @@ this.ChartBuilder = (function() {
           }
         });
     }
+    if (chart.aggregateBy) {
+      return _.extend(shared, {
+        xAxis: {
+          type: 'datetime',
+          title: {
+            text: 'Time'
+          }
+        }
+      });
+    }
   };
 
   ChartBuilder.getAxisInfo = function(field) {
-    if (_.isNull(field) || _.isUndefined(field) || field.id === "") {
+    if (_.isNull(field) || _.isUndefined(field) || _.isUndefined(field.id) || field.id === "") {
       return {
         type: 'datetime',
         title: {
