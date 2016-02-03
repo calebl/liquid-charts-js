@@ -1,5 +1,5 @@
 # liquid-charts-js
-Liquid Charts is a javascript library for displaying charts build in Liquid on third party sites.
+Liquid Charts is a javascript library for displaying charts built in Liquid on third party sites.
 
 Liquid Charts currently only supports displaying public charts. Capabilities for displaying charts from private datasets will come in later versions.
 
