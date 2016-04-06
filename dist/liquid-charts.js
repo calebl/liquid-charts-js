@@ -2199,6 +2199,10 @@ this.Liquid = (function(){
               var chartingHelper = new ChartBuilder(chartInfo.dataset, chartInfo.chart)
               var idArray = chartInfo.idArray
               var options = chartingHelper.getOptions(idArray)
+              if(chartInfo.yAxis){
+                options["yAxis"] = chartInfo.yAxis;
+                options["tooltip"] = {shared: true};
+              }
               $element.highcharts(options)
               var highchart = $element.highcharts()
 
