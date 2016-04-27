@@ -27,7 +27,7 @@ this.Liquid = (function(){
 
       });
     },
-    initChart: function(element, chartId) {
+    initChart: function(element, chartId, useHighStocks) {
       var $element = $(element)
       var chartSub = self.connection.subscribe("chart", chartId)
 
@@ -47,7 +47,11 @@ this.Liquid = (function(){
               if(chartInfo.options){
                 _.extend(options,chartInfo.options);
               }
-              $element.highcharts(options)
+              if(useHighStocks === true){
+                $element.highcharts('StockChart', options)
+              } else {
+                $element.highcharts(options)
+              }
               var highchart = $element.highcharts()
 
               var seriesData = chartInfo.data

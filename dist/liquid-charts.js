@@ -1,5 +1,3 @@
-//DO NOT modify this file. Changes to this class should be made in the Liquid mainline
-
 this.ChartBuilder = (function() {
   ChartBuilder.colors = ['#47a9be', '#be5c47', '#47be98', '#476ebe', '#be9847', '#be476e', '#a9be47', '#be47a9', '#47be5c'];
 
@@ -42,6 +40,7 @@ this.ChartBuilder = (function() {
   ChartBuilder.prototype.processRecords = function(records) {
     var categories, chart, cols, fields, idArray, options, self, series, xAxis, yAxis;
     chart = this.chart;
+
     options = this.getOptions();
     xAxis = options.xAxis;
     yAxis = options.yAxis;
@@ -152,7 +151,7 @@ this.ChartBuilder = (function() {
         }
       });
       return series.push({
-        id: seriesName,
+        id: new Meteor.Collection.ObjectID().toHexString(),
         name: seriesName,
         color: ChartBuilder.colors[series.length % ChartBuilder.colors.length],
         data: data
@@ -208,9 +207,8 @@ this.ChartBuilder = (function() {
                     });
                     if (idObject) {
                       return Router.go('showRecord', {
-                        username: set.username,
-                        slug: set.slug,
-                        id: idObject.ids[this.series.data.indexOf(this)]
+                        _id: set.id,
+                        recordNumber: idObject.ids[this.series.data.indexOf(this)]
                       });
                     }
                   }
@@ -246,7 +244,7 @@ this.ChartBuilder = (function() {
     if (_.isUndefined(groupByField) || _.isNull(groupByField) || groupByField === "") {
       fields = _.map(records, function(r) {
         return {
-          id: r._id,
+          id: r.recordNumber,
           createdAt: r.createdAt,
           response: r.response
         };
@@ -255,7 +253,7 @@ this.ChartBuilder = (function() {
       if (groupByField && groupByField.id === 'liquidUserId') {
         fields = _.map(records, function(r) {
           return {
-            id: r._id,
+            id: r.recordNumber,
             groupByValue: r.user.username,
             createdAt: r.createdAt,
             response: r.response
@@ -271,7 +269,7 @@ this.ChartBuilder = (function() {
         });
         fields = _.map(fields, function(r) {
           return {
-            id: r._id,
+            id: r.recordNumber,
             groupByValue: _.findWhere(r.response, {
               id: groupByField.id
             }).value,
@@ -466,7 +464,7 @@ this.ChartBuilder = (function() {
         });
     }
     if (chart.aggregateBy) {
-      return _.extend(shared, {
+      _.extend(shared, {
         xAxis: {
           type: 'datetime',
           title: {
@@ -475,6 +473,8 @@ this.ChartBuilder = (function() {
         }
       });
     }
+
+    return shared;
   };
 
   ChartBuilder.getAxisInfo = function(field) {
@@ -544,16 +544,21 @@ this.ChartBuilder = (function() {
     return {
       formatter: function() {
         var equation, header, rsq, x, y;
-        header = '<span><b>' + this.series.name + '</b></span><br/>';
-        if (this.series.options.isRegressionLine) {
-          equation = '<span>' + "Equation: " + this.series.options.regressionOutputs.string + '</span>' + '<br/>';
-          rsq = '<span>' + "r\xB2: " + this.series.options.regressionOutputs.rSquared + '</span>';
-          return header + equation + rsq;
+        if(!_.isUndefined(this.series)){
+          header = '<span><b>' + this.series.name + '</b></span><br/>';
+
+          if (this.series.options.isRegressionLine) {
+            equation = '<span>' + "Equation: " + this.series.options.regressionOutputs.string + '</span>' + '<br/>';
+            rsq = '<span>' + "r\xB2: " + this.series.options.regressionOutputs.rSquared + '</span>';
+            return header + equation + rsq;
+          }
         } else {
-          x = ChartBuilder.getTooltipFieldLabel(xAxis.type, xField, this.x) + '<br/>';
-          y = ChartBuilder.getTooltipFieldLabel(yAxis.type, yField, this.y) + '<br/>';
-          return header + x + y;
+          header="";
         }
+
+        x = ChartBuilder.getTooltipFieldLabel(xAxis.type, xField, this.x) + '<br/>';
+        y = ChartBuilder.getTooltipFieldLabel(yAxis.type, yField, this.y) + '<br/>';
+        return header + x + y;
       }
     };
   };
@@ -2182,7 +2187,7 @@ this.Liquid = (function(){
 
       });
     },
-    initChart: function(element, chartId) {
+    initChart: function(element, chartId, useHighStocks) {
       var $element = $(element)
       var chartSub = self.connection.subscribe("chart", chartId)
 
@@ -2202,7 +2207,11 @@ this.Liquid = (function(){
               if(chartInfo.options){
                 _.extend(options,chartInfo.options);
               }
-              $element.highcharts(options)
+              if(useHighStocks === true){
+                $element.highcharts('StockChart', options)
+              } else {
+                $element.highcharts(options)
+              }
               var highchart = $element.highcharts()
 
               var seriesData = chartInfo.data
