@@ -1,0 +1,12 @@
+{
+  "name": "liquid-chart-js",
+  "description": "Real-time charts on third party websites",
+  "version": "1.0.0",
+  "author": {
+    "name": "Caleb",
+    "email": "caleb@getliquid.io"
+  },
+  "devDependencies": {
+    "http-server": "^0.9.0"
+  }
+}
