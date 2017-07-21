@@ -6,19 +6,52 @@ this.Liquid = (function(){
       this.connection = null;
       this.chartSub = null;
       this.charts = null;
+      this.data = [];
+
 
       this.connect();
     },
     connect: function(){
 
-      self = this
+      self = this;
       self.connection = new Asteroid(this.endpoint, this.ssl);
       self.connection.on("connected", function() {
         console.log("Connected.");
 
         self.charts = self.connection.getCollection("charts");
+        if(!self.connection.loggedIn) {
+          self.connection.loginWithPassword('caleb', 'n03xcus3s');
+        }
       });
       self.connection.on("login", function() {
+        console.log('logged in');
+
+        // var chartSub = self.connection.subscribe("chart", chartId);
+        //
+        //
+        // chartSub.ready.then(
+        //   //onFulfilled
+        //   function(result){
+        //     self.connection.call("Charts.getData","uccT5W5NHgTC4RuKk","JYWnxEsbtebp2xZdS").result.then(
+        //       function fulfilled(result){
+        //         console.log('success');
+        //         console.log(result);
+        //
+        //         self.records = result;
+        //       },
+        //       function rejected(reason){
+        //         console.log('error!');
+        //         console.log(reason);
+        //       }
+        //     )
+        //   },
+        //
+        //   //onRejected
+        //   function(error){
+        //
+        //   }
+        // );
+
 
       });
       self.connection.on("logout", function() {
@@ -27,65 +60,55 @@ this.Liquid = (function(){
 
       });
     },
-    initChart: function(element, chartId, useHighStocks) {
-      var $element = $(element)
-      var chartSub = self.connection.subscribe("chart", chartId)
+    initChart: function(element, chartInfo, useHighStocks) {
+      var $element = $(element);
+
+      self.connection.on("login", function() {
+        console.log('logged in');
 
 
-      chartSub.ready.then(
-        //onFulfilled
-        function(result){
-          // var highchart = $element.highcharts()
+        var chartingHelper = new ChartBuilder(chartInfo.dataset, chartInfo.chart);
+        var options = chartingHelper.getOptions([]);
+        if (chartInfo.options) {
+          _.extend(options, chartInfo.options);
+        }
+        if (useHighStocks === true) {
+          $element.highcharts('StockChart', options)
+        } else {
+          $element.highcharts(options)
+        }
+        var highchart = $element.highcharts();
 
-          var updateChart = function(query){
-            if(query.result.length > 0) {
-              var chartInfo = query.result[0];
+        self.connection.call("Charts.getData", chartInfo.chart, chartInfo.dataset.id).result.then(
+          function fulfilled(result) {
+            console.log('chart data found');
+            console.log(result);
 
-              var chartingHelper = new ChartBuilder(chartInfo.dataset, chartInfo.chart)
-              var idArray = chartInfo.idArray
-              var options = chartingHelper.getOptions(idArray)
-              if(chartInfo.options){
-                _.extend(options,chartInfo.options);
-              }
-              if(useHighStocks === true){
-                $element.highcharts('StockChart', options)
-              } else {
-                $element.highcharts(options)
-              }
-              var highchart = $element.highcharts()
+            self.data = result.data;
 
-              var seriesData = chartInfo.data
+            var seriesData = chartInfo.data;
 
-              if ( seriesData ) {
-                for (var i=0; i< seriesData.length; i++ ) {
-                  var data = seriesData[i]
-                  var seriesName = data.id;
-                  var chartSeries = highchart.get( seriesName );
-                  if ( chartSeries ){
-                    chartSeries.setData( data.data );
-                  } else {
-                    highchart.addSeries( data );
-                  }
+            if (seriesData) {
+              for (var i = 0; i < seriesData.length; i++) {
+                var data = seriesData[i];
+                var seriesName = data.id;
+                var chartSeries = highchart.get(seriesName);
+                if (chartSeries) {
+                  chartSeries.setData(data.data);
+                } else {
+                  highchart.addSeries(data);
                 }
               }
             }
+          },
+          function rejected(reason) {
+            console.log('error!');
+            console.log(reason);
           }
-
-          var query = self.charts.reactiveQuery({_id: chartId})
-          query.on("change", function(id){
-            updateChart(query);
-          });
-
-          updateChart(query);
+        )
 
 
-
-        },
-        //onRejected
-        function(err) {
-          console.log(err);
-        }
-      );
+      });
     }
   }
 })();

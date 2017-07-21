@@ -2166,12 +2166,13 @@ this.Liquid = (function(){
       this.connection = null;
       this.chartSub = null;
       this.charts = null;
+      this.records = [];
 
       this.connect();
     },
     connect: function(){
 
-      self = this
+      self = this;
       self.connection = new Asteroid(this.endpoint, this.ssl);
       self.connection.on("connected", function() {
         console.log("Connected.");
@@ -2179,7 +2180,18 @@ this.Liquid = (function(){
         self.charts = self.connection.getCollection("charts");
       });
       self.connection.on("login", function() {
+        console.log('logged in');
 
+        self.records = self.connection.call("Charts.getData","uccT5W5NHgTC4RuKk","JYWnxEsbtebp2xZdS").result.then(
+          function fulfilled(result){
+            console.log('success');
+            console.log(result);
+          },
+          function rejected(reason){
+            console.log('error!');
+            console.log(reason);
+          }
+        )
       });
       self.connection.on("logout", function() {
         console.log("logged out");
@@ -2188,8 +2200,8 @@ this.Liquid = (function(){
       });
     },
     initChart: function(element, chartId, useHighStocks) {
-      var $element = $(element)
-      var chartSub = self.connection.subscribe("chart", chartId)
+      var $element = $(element);
+      var chartSub = self.connection.subscribe("chart", chartId);
 
 
       chartSub.ready.then(
@@ -2202,8 +2214,8 @@ this.Liquid = (function(){
               var chartInfo = query.result[0];
 
               var chartingHelper = new ChartBuilder(chartInfo.dataset, chartInfo.chart)
-              var idArray = chartInfo.idArray
-              var options = chartingHelper.getOptions(idArray)
+              var idArray = chartInfo.idArray;
+              var options = chartingHelper.getOptions(idArray);
               if(chartInfo.options){
                 _.extend(options,chartInfo.options);
               }
@@ -2212,13 +2224,13 @@ this.Liquid = (function(){
               } else {
                 $element.highcharts(options)
               }
-              var highchart = $element.highcharts()
+              var highchart = $element.highcharts();
 
-              var seriesData = chartInfo.data
+              var seriesData = chartInfo.data;
 
               if ( seriesData ) {
                 for (var i=0; i< seriesData.length; i++ ) {
-                  var data = seriesData[i]
+                  var data = seriesData[i];
                   var seriesName = data.id;
                   var chartSeries = highchart.get( seriesName );
                   if ( chartSeries ){
@@ -2229,9 +2241,9 @@ this.Liquid = (function(){
                 }
               }
             }
-          }
+          };
 
-          var query = self.charts.reactiveQuery({_id: chartId})
+          var query = self.charts.reactiveQuery({_id: chartId});
           query.on("change", function(id){
             updateChart(query);
           });
