@@ -1,4 +1,4 @@
-#Connecting to, Checking, and Restarting CGC Sensors
+# Connecting to, Checking, and Restarting CGC Sensors
 
 Configuration
 There are currently total of 7 functioning relays ("routers") in the GLS tech closet that connect to  various sensors on the site. They are as follows:
