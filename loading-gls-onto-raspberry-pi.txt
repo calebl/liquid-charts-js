@@ -1,6 +1,7 @@
 # Loading GLS onto a raspberry pi
 
 copy owpy.tar.gz, agrasurvey, agrasurvey.py, agra.tar, gm.conf, key.pem, agrasurvey-init.d, and libow-2.8-15.conf to the pi
+
 sudo apt-get update
 sudo apt-get install python-dev
 sudo apt-get install python-pip
