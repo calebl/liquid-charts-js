@@ -3,13 +3,13 @@
 Configuration
 There are currently total of 7 functioning relays ("routers") in the GLS tech closet that connect to  various sensors on the site. They are as follows:
  - 192.168.150.10: Permeable Asphalt (Zone 1); Netis
- - 192.168.150.11: Permeable Concrete (Zone 2); Netis
- - 192.168.150.12: Concrete (Zone 3); Netis
- - 192.168.150.13: Paver 1 (Zone 4); Netis
- - 192.168.150.14: Paver 2 (Zone 5); Netis
- - 192.168.150.15: Paver 3 (Zone 6); Netis
+ - 192.168.150.11: Permeable Concrete (Zone 2); Netis  (not detecting sensor)
+ - 192.168.150.12: Concrete (Zone 3); Netis            (not detecting sensor)
+ - 192.168.150.13: Paver 1 (Zone 4); Netis             (looks correct)
+ - 192.168.150.14: Paver 2 (Zone 5); Netis             (no route to host)
+ - 192.168.150.15: Paver 3 (Zone 6); Netis             (not detecting sensor)
  - 192.168.150.16: Bioswale; Raspberry Pi
- - 192.168.150.17: Rain Gauge; Raspberry Pi
+ - 192.168.150.17: Rain Gauge; Raspberry Pi            (unable to ssh into it)
 
 Zones 1-5 are connected to 1 sensor each. Zone 6 is not functional and is considered and invalid installation because of the paver placement itself. It is a different size and in a different location from zones 1-5, so meaningful comparisons to it cannot be made.
 
@@ -38,3 +38,11 @@ ps aux |grep agra
 When you do, you should see agrasurvey.py running.
 
 (More to come...)
+
+## for restarting:
+ - `sudo service agrasurvey stop`
+ - then `sudo service agrasurvey start`
+
+sudo does not work for Netix so you have to use `su root` first
+
+for both OSses you can access the service file directly at `/etc/init.d/agrasurvey` and start/stop them directly if the service exec isn’t working
