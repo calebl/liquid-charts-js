@@ -89,7 +89,8 @@ const defaultChartOptions = {
 const rainGuage = {
   "id" : "D50000000F681B1D",
   "name" : "Rain Guage 1",
-  "color" : "#be476e",
+  "color" : "#8bbc21",
+  "type" : "column",
   "lineWidth" : 3,
   "tooltip" : {
     "valueSuffix" : " in."
@@ -103,7 +104,7 @@ const zone1 = {
   "id" : "BC0000000F968F1D",
   "name" : "Permeable Asphalt (Zone 1)",
   "color" : "#476ebe",
-  "type" : "spline",
+  "type" : "column",
   "lineWidth" : 3,
   "yAxis" : 1,
   "tooltip" : {
@@ -118,7 +119,7 @@ const zone2 = {
   "id" : "280000000F861C1D-V",
   "name" : "Permeable Concrete (Zone 2)",
   "color" : "#47a9be",
-  "type" : "spline",
+  "type" : "column",
   "lineWidth" : 3,
   "yAxis" : 1,
   "tooltip" : {
@@ -133,7 +134,7 @@ const zone3 = {
   "id" : "520000000FDDDC1D",
   "name" : "Concrete (Zone 3)",
   "color" : "#be9847",
-  "type" : "spline",
+  "type" : "column",
   "lineWidth" : 3,
   "yAxis" : 1,
   "tooltip" : {
@@ -148,7 +149,7 @@ const zone4 = {
   "id" : "E10000000DD5271D",
   "name" : "Paver 1 (Zone 4)",
   "color" : "#47be98",
-  "type" : "spline",
+  "type" : "column",
   "lineWidth" : 3,
   "yAxis" : 1,
   "tooltip" : {
@@ -163,7 +164,7 @@ const zone5 = {
   "id" : "070000000F87D01D",
   "name" : "Paver 2 (Zone 5)",
   "color" : "#be5c47",
-  "type" : "spline",
+  "type" : "column",
   "lineWidth" : 3,
   "yAxis" : 1,
   "tooltip" : {
@@ -198,7 +199,7 @@ class CGCLiveChart {
   }
 
   getAllData() {
-    const url = 'http://localhost:4000/services/2dc01e504a258402e25137fd167ef11af37e2be79f6e0d9d/get_data';
+    const url = 'http://165.227.252.41/getData?key=2dc01e504a258402e25137fd167ef11af37e2be79f6e0d9d';
 
     let result = "";
     const req = http.get(url, (res) => {

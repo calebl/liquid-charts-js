@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "start": "http-server"
   },
   "devDependencies": {
     "http-server": "^0.9.0",
